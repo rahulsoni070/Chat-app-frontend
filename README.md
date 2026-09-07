@@ -1,70 +1,168 @@
-# Getting Started with Create React App
+# Chat App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack real-time chat application where users can register, see other users, and exchange private messages instantly. Includes typing indicators, read receipts (single tick, double tick, blue tick), message timestamps, and an emoji picker.
 
-## Available Scripts
+Built with a React frontend, Express/Node backend, MongoDB (Mongoose) database, Socket.IO for real-time communication, and JWT-based authentication.
 
-In the project directory, you can run:
+## Demo Link
 
-### `npm start`
+[Live Demo](https://chat-app-frontend-psi-roan.vercel.app/) • [Backend API](https://chat-app-backend-l65n.onrender.com/)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+> Note: the backend runs on a free hosting tier and sleeps after inactivity. The first request may take up to 50 seconds to wake it up.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Quick Start
 
-### `npm test`
+This project has two folders: `frontend` and `backend`. (The frontend and backend are also in separate GitHub repos.)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Backend
 
-### `npm run build`
+```
+git clone https://github.com/rahulsoni070/Chat-app-backend.git
+cd Chat-app-backend
+npm install
+node index.js
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Runs on `http://localhost:5001`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Frontend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+git clone https://github.com/rahulsoni070/Chat-app-frontend.git
+cd Chat-app-frontend
+npm install
+npm start
+```
 
-### `npm run eject`
+Runs on `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Environment Variables
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Create a `.env` file in the backend with:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+MONGO_URI=<your-mongodb-connection-string>
+JWT_SECRET=<your-secret-key>
+CLIENT_URL=http://localhost:3000
+PORT=5001
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The frontend falls back to `http://localhost:5001` automatically, so no `.env` is needed locally. For deployment, set `REACT_APP_API_URL` to the deployed backend URL.
 
-## Learn More
+## Technologies
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* React JS
+* Socket.IO (client and server)
+* Node.js
+* Express
+* MongoDB (Mongoose)
+* JWT (JSON Web Token)
+* bcrypt
+* Axios
+* Bootstrap
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Features
 
-### Code Splitting
+### Authentication
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+* Register and login with JWT
+* Passwords hashed with bcrypt before storage
+* Login persists across page refreshes using localStorage
+* Logout clears the session
 
-### Analyzing the Bundle Size
+### Real-Time Messaging
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+* Instant message delivery using Socket.IO
+* Private one-to-one chats using Socket.IO rooms, so messages are only sent to the intended recipient
+* Message history stored in MongoDB and loaded when a chat is opened
 
-### Making a Progressive Web App
+### Typing Indicator
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+* Shows "user is typing..." in real time
+* Debounced so the indicator clears once the user actually stops typing
+* Never stored in the database
 
-### Advanced Configuration
+### Read Receipts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+* Single tick — message saved on the server
+* Double tick — message delivered to the recipient's browser
+* Blue tick — recipient opened the conversation
 
-### Deployment
+### Timestamps
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+* Every message stores `createdAt` in UTC
+* Displayed in each user's own local timezone
 
-### `npm run build` fails to minify
+### Emoji Picker
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* Emoji panel next to the message input
+* Emojis are stored and delivered like normal text
+
+## API Reference
+
+Auth routes are served under `/auth`. Message and user routes are served at the root.
+
+### Auth
+
+`POST /auth/register` — Register a new user
+
+Sample Response:
+
+```
+{ "message": "User registered successfully", "token": "...", "username": "..." }
+```
+
+`POST /auth/login` — Log in and receive a JWT
+
+Sample Response:
+
+```
+{ "message": "Login successful", "token": "...", "username": "..." }
+```
+
+### Users
+
+`GET /users?currentUser=<username>` — List all users except the current one
+
+Sample Response:
+
+```
+[{ "_id": "...", "username": "...", "createdAt": "..." }, ...]
+```
+
+### Messages
+
+`GET /messages?sender=<username>&receiver=<username>` — Get the full conversation between two users, sorted oldest first
+
+Sample Response:
+
+```
+[{ "_id": "...", "sender": "...", "receiver": "...", "message": "...", "status": "read", "createdAt": "..." }, ...]
+```
+
+## Socket Events
+
+### Client to Server
+
+| Event | Payload | Purpose |
+|---|---|---|
+| `join` | `username` | Joins a room named after the user so messages can be addressed to them |
+| `send_message` | `{ sender, receiver, message }` | Saves the message and delivers it to the receiver |
+| `message_delivered` | `{ messageId }` | Marks a message as delivered (double tick) |
+| `mark_as_read` | `{ sender, receiver }` | Marks a conversation as read (blue tick) |
+| `typing` | `{ sender, receiver }` | Tells the receiver the sender is typing |
+| `stop_typing` | `{ sender, receiver }` | Clears the typing indicator |
+
+### Server to Client
+
+| Event | Payload | Purpose |
+|---|---|---|
+| `receive_message` | message object | A new message has arrived |
+| `message_status_update` | `{ messageId, status }` | A message moved to delivered |
+| `messages_read` | `{ sender, receiver }` | The recipient read the conversation |
+| `user_typing` | `{ sender }` | Show the typing indicator |
+| `user_stop_typing` | `{ sender }` | Hide the typing indicator |
+
+## Contact
+
+For bugs or feature requests, please reach out to [rahulsoni66676@gmail.com](mailto:rahulsoni66676@gmail.com)
