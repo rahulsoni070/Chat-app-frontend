@@ -1,0 +1,163 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.app {
+    text-align: center;
+    margin: 20px;
+}
+
+.auth-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px auto;
+}
+
+.auth-form {
+    margin: 20px;
+}
+
+.chat-container {
+    max-width: 900px;
+    min-height: 60vh;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.message-list {
+    height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message {
+    max-width: 65%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message.sent {
+    align-self: flex-end;
+    background-color: #daf8cb;
+    border-bottom-right-radius: 3px;
+}
+
+.message.received {
+    align-self: flex-start;
+    background-color: #f1f0f0;
+    border-bottom-left-radius: 3px;
+}
+
+.msg-time {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+    text-align: right;
+}
+
+.tick {
+    margin-left: 5px;
+    color: #888;
+}
+
+.tick.read {
+    color: #34b7f1;
+}
+
+.message-field {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.message-field input {
+    flex: 1;
+    max-width: 500px;
+    margin: 0;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.btn-prime {
+    background-color: #daf8cb;
+    border: 1px solid #b6e4a0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-prime:hover {
+    background-color: #c5f0ae;
+}
+
+.emoji-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+.emoji-box {
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    z-index: 10;
+}
+
+.typing-indicator {
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+    height: 18px;
+    margin: 4px 0;
+}
+
+.msg-error {
+    color: #c0392b;
+    background: #fdecea;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.empty-note {
+    color: #999;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.btn-logout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background: #e5e5e5;
+}
