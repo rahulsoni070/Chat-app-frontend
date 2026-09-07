@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
+
 const Login = ({ setUser }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +19,7 @@ const Login = ({ setUser }) => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post("http://localhost:5001/auth/login", {
+      const { data } = await axios.post(`{API}/auth/login`, {
         username,
         password,
       });

@@ -5,7 +5,9 @@ import MessageList from "./MessageList";
 import "./chat.css";
 import EmojiPicker from "emoji-picker-react";
 
-const socket = io("http://localhost:5001");
+const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
+
+const socket = io(API);
 
 export const Chat = ({ user }) => {
   const [users, setUsers] = useState([]);
@@ -25,7 +27,7 @@ export const Chat = ({ user }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5001/users", {
+        const { data } = await axios.get(`${API}/users`, {
           params: { currentUser: user.username },
         });
         setUsers(data);
@@ -92,7 +94,7 @@ export const Chat = ({ user }) => {
 
   const fetchMessages = async (receiver) => {
     try {
-      const { data } = await axios.get("http://localhost:5001/messages", {
+      const { data } = await axios.get(`${API}/messages`, {
         params: { sender: user.username, receiver },
       });
       setMessages(data);
