@@ -22,6 +22,14 @@ export const Chat = ({ user }) => {
 
   useEffect(() => {
     socket.emit("join", user.username);
+
+    socket.on("connect", () => {
+      socket.emit("join", user.username);
+    });
+
+    return () => {
+      socket.off("connect");
+    };
   }, [user.username]);
 
   useEffect(() => {
@@ -188,6 +196,7 @@ export const Chat = ({ user }) => {
               currentChat === u.username ? "active" : ""
             }`}
             onClick={() => fetchMessages(u.username)}
+            title={u.username}
           >
             {u.username}
           </div>

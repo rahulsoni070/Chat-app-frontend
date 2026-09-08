@@ -77,17 +77,27 @@ body {
     color: #34b7f1;
 }
 
+.date-divider {
+    align-self: center;
+    background: #e8e8e8;
+    color: #666;
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
 .message-field {
     position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 8px;
+    padding: 0 10px;
 }
 
 .message-field input {
     flex: 1;
-    max-width: 500px;
+    min-width: 0;
     margin: 0;
 }
 
@@ -102,6 +112,8 @@ input, button {
     border: 1px solid #b6e4a0;
     border-radius: 5px;
     cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .btn-prime:hover {
@@ -114,6 +126,7 @@ input, button {
     font-size: 22px;
     cursor: pointer;
     padding: 0 8px;
+    flex-shrink: 0;
 }
 
 .emoji-box {
