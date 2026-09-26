@@ -20,7 +20,7 @@ This project has two folders: `frontend` and `backend`. (The frontend and backen
 git clone https://github.com/rahulsoni070/Chat-app-backend.git
 cd Chat-app-backend
 npm install
-node index.js
+npm start          # or: npm run dev (auto-restart)
 ```
 
 Runs on `http://localhost:5001`
@@ -43,7 +43,7 @@ Create a `.env` file in the backend with:
 ```
 MONGO_URI=<your-mongodb-connection-string>
 JWT_SECRET=<your-secret-key>
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=http://localhost:3000   # comma-separate multiple origins
 PORT=5001
 ```
 
@@ -59,13 +59,14 @@ The frontend falls back to `http://localhost:5001` automatically, so no `.env` i
 * JWT (JSON Web Token)
 * bcrypt
 * Axios
-* Bootstrap
 
 ## Features
 
-### Authentication
+### Authentication & Security
 
 * Register and login with JWT
+* Every REST route and the Socket.IO handshake verify the JWT; message senders come from the token, so nobody can send or read messages as someone else
+* Password hashes are never sent to the client
 * Passwords hashed with bcrypt before storage
 * Login persists across page refreshes using localStorage
 * Logout clears the session
@@ -95,16 +96,22 @@ The frontend falls back to `http://localhost:5001` automatically, so no `.env` i
 
 ### Emoji Picker
 
-* Emoji panel next to the message input
+* Emoji panel next to the message input (loaded on demand, follows light/dark theme)
 * Emojis are stored and delivered like normal text
+
+### Modern, Responsive UI
+
+* Works on phones, tablets and desktops — on phones the chat list and conversation are separate screens with a back button
+* Automatic dark mode, colored initial avatars, online presence dots and unread badges
+* Search people, multi-line messages (Shift+Enter), optimistic sending with a "failed" state
 
 ## API Reference
 
-Auth routes are served under `/auth`. Message and user routes are served at the root.
+Auth routes are served under `/auth`. Every other route requires an `Authorization: Bearer <token>` header; requests without a valid token get `401`.
 
 ### Auth
 
-`POST /auth/register` — Register a new user
+`POST /auth/register` — Register a new user (username 3–30 characters, password at least 6)
 
 Sample Response:
 
@@ -120,9 +127,15 @@ Sample Response:
 { "message": "Login successful", "token": "...", "username": "..." }
 ```
 
+`GET /auth/me` — Returns the user the token belongs to
+
+```
+{ "username": "..." }
+```
+
 ### Users
 
-`GET /users?currentUser=<username>` — List all users except the current one
+`GET /users` — List all users except the caller. Password hashes are never returned.
 
 Sample Response:
 
@@ -132,7 +145,7 @@ Sample Response:
 
 ### Messages
 
-`GET /messages?sender=<username>&receiver=<username>` — Get the full conversation between two users, sorted oldest first
+`GET /messages?with=<username>` — The conversation between the caller and `<username>`, oldest first
 
 Sample Response:
 
@@ -140,18 +153,25 @@ Sample Response:
 [{ "_id": "...", "sender": "...", "receiver": "...", "message": "...", "status": "read", "createdAt": "..." }, ...]
 ```
 
+`GET /messages/unread` — Unread counts for the caller, keyed by sender
+
+```
+{ "bob": 2, "carol": 1 }
+```
+
 ## Socket Events
+
+The socket connection must pass the JWT: `io(API_URL, { auth: { token } })`. The server rejects the handshake without a valid token, and the sender of every event is taken from the token — any `sender` in a client payload is ignored.
 
 ### Client to Server
 
 | Event | Payload | Purpose |
 |---|---|---|
-| `join` | `username` | Joins a room named after the user so messages can be addressed to them |
-| `send_message` | `{ sender, receiver, message }` | Saves the message and delivers it to the receiver |
-| `message_delivered` | `{ messageId }` | Marks a message as delivered (double tick) |
-| `mark_as_read` | `{ sender, receiver }` | Marks a conversation as read (blue tick) |
-| `typing` | `{ sender, receiver }` | Tells the receiver the sender is typing |
-| `stop_typing` | `{ sender, receiver }` | Clears the typing indicator |
+| `send_message` | `{ receiver, message }` + ack callback | Saves the message (max 2000 characters) and delivers it; the ack gets the saved message or `{ error }` |
+| `message_delivered` | `{ messageId }` | Marks a message addressed to you as delivered (double tick) |
+| `mark_as_read` | `{ sender }` | Marks messages from `sender` to you as read (blue tick) |
+| `typing` | `{ receiver }` | Tells the receiver you are typing |
+| `stop_typing` | `{ receiver }` | Clears the typing indicator |
 
 ### Server to Client
 
@@ -160,8 +180,17 @@ Sample Response:
 | `receive_message` | message object | A new message has arrived |
 | `message_status_update` | `{ messageId, status }` | A message moved to delivered |
 | `messages_read` | `{ sender, receiver }` | The recipient read the conversation |
-| `user_typing` | `{ sender }` | Show the typing indicator |
-| `user_stop_typing` | `{ sender }` | Hide the typing indicator |
+| `user_typing` | `{ sender, receiver }` | Show the typing indicator |
+| `user_stop_typing` | `{ sender, receiver }` | Hide the typing indicator |
+| `online_users` | `[username, ...]` | Who is online, sent once on connect |
+| `user_online` / `user_offline` | `username` | Presence changes |
+
+## Tests
+
+```
+cd Chat-app-backend && npm test     # node:test — JWT checks on REST + sockets, no database needed
+cd Chat-app-frontend && npm test    # Jest + React Testing Library
+```
 
 ## Contact
 
