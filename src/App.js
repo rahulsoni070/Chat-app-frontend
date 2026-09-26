@@ -1,53 +1,42 @@
-import React, { useState, useEffect } from "react";
-import Login from "./components/Login";
-import Register from "./components/Register";
+import React, { useCallback, useEffect, useState } from "react";
+import AuthPage from "./components/AuthPage";
 import { Chat } from "./components/Chat";
-import "bootstrap/dist/js/bootstrap.min.js";
-import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  api,
+  loadSession,
+  saveSession,
+  setAuthToken,
+  setUnauthorizedHandler,
+} from "./api";
+
+const initialSession = loadSession();
+setAuthToken(initialSession?.token);
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(initialSession);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("chatUser");
-    if (saved) {
-      setUser(JSON.parse(saved));
-    }
+  const updateSession = useCallback((next) => {
+    setAuthToken(next?.token);
+    saveSession(next);
+    setSession(next);
   }, []);
 
-  const handleSetUser = (data) => {
-    setUser(data);
-    localStorage.setItem("chatUser", JSON.stringify(data));
-  };
+  const handleLogout = useCallback(() => updateSession(null), [updateSession]);
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("chatUser");
-  };
+  // Any 401 (expired or revoked token) sends the user back to the sign-in screen.
+  useEffect(() => {
+    setUnauthorizedHandler(handleLogout);
+  }, [handleLogout]);
 
-  return (
-    <div className="app">
-      <h1>Chat App</h1>
-      {!user ? (
-        <div className="container mt-5 text-center">
-          <div className="row">
-            <div className="col-md-6">
-              <Register setUser={handleSetUser} />
-            </div>
-            <div className="col-md-6">
-              <Login setUser={handleSetUser} />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <button className="btn-logout" onClick={handleLogout}>
-            Logout
-          </button>
-          <Chat user={user} />
-        </>
-      )}
-    </div>
+  // Validate a token restored from a previous visit.
+  useEffect(() => {
+    if (initialSession) api.get("/auth/me").catch(() => {});
+  }, []);
+
+  return session ? (
+    <Chat user={session} onLogout={handleLogout} />
+  ) : (
+    <AuthPage onAuth={updateSession} />
   );
 };
 
